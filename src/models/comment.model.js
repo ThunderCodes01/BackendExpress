@@ -5,10 +5,12 @@ const commentSchema = new Schema(
     video: {
       type: Schema.Types.ObjectId,
       ref: "Video",
+      index: true,
     },
     onComment: {
       type: Schema.Types.ObjectId,
       ref: "Comment",
+      index: true,
     },
     content: {
       type: String,

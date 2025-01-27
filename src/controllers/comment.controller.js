@@ -51,7 +51,7 @@ const addCommentOnComment = asyncHandler(async (req, res) => {
   const createComment = await Comment.create({
     onComment: commentFind._id,
     content: content,
-    CommenetedBy: req.user._id,
+    commentBy: req.user._id,
   });
   if (!createComment) {
     throw new ApiError(500, "Something went wrong");
@@ -122,5 +122,348 @@ const getAllCommentWithLike = asyncHandler(async (req, res) => {
   );
 });
 
-const getCOC = asyncHandler(async (req, res) => {});
+// const getCOC = asyncHandler(async (req, res) => {
+//   const { videoId } = req.params;
+//   if (!videoId) {
+//     throw new ApiError(403, "VideoIdneeded");
+//   }
+//   const totalComment = await Comment.aggregate([
+//     {
+//       $match: {
+//         video: new mongoose.Types.ObjectId(videoId),
+//         onComment: { $exists: false },
+//       },
+//     },
+//     {
+//       $lookup: {
+//         from: "likes",
+//         localField: "_id",
+//         foreignField: "comment",
+//         as: "Likes",
+//       },
+//     },
+//     {
+//       $lookup: {
+//         from: "users",
+//         localField: "commentBy",
+//         foreignField: "_id",
+//         as: "users",
+//       },
+//     },
+//     {
+//       $addFields: {
+//         userDetails: {
+//           $arrayElemAt: ["$users", 0],
+//         },
+//       },
+//     },
+//     {
+//       $lookup: {
+//         from: "comments",
+//         localField: "_id",
+//         foreignField: "onComment",
+//         as: "replies",
+//         pipeline: [
+//           {
+//             $lookup: {
+//               from: "likes",
+//               localField: "_id",
+//               foreignField: "comment",
+//               as: "likesonReply",
+//             },
+//           },
+//           {
+//             $addFields: {
+//               totalLikesonReply: { $size: { $ifNull: ["$likesonReply", []] } },
+//             },
+//           },
+//           {
+//             $lookup: {
+//               from: "users",
+//               localField: "commentBy",
+//               foreignField: "_id",
+//               as: "userOnReply",
+//             },
+//           },
+//           {
+//             $addFields: {
+//               userDetailsOnreply: {
+//                 $arrayElemAt: ["$userOnReply", 0],
+//               },
+//             },
+//           },
+//           {
+//             $lookup: {
+//               from: "comments",
+//               localField: "_id",
+//               foreignField: "onComment",
+//               as: "nestedReplies",
+//               pipeline: [
+//                 {
+//                   $lookup: {
+//                     from: "likes",
+//                     localField: "_id",
+//                     foreignField: "comment",
+//                     as: "likesonNestedReplies",
+//                   },
+//                 },
+//                 {
+//                   $addFields: {
+//                     totallikesonNestedReplies: {
+//                       $size: { $ifNull: ["$likesonNestedReplies", []] },
+//                     },
+//                   },
+//                 },
+
+//                 {
+//                   $lookup: {
+//                     from: "comments",
+//                     localField: "_id",
+//                     foreignField: "onComment",
+//                     as: "repliesonNestedReplies",
+//                   },
+//                 },
+//                 {
+//                   $lookup: {
+//                     from: "users",
+//                     localField: "commentBy",
+//                     foreignField: "_id",
+//                     as: "userOnNestedReplies",
+//                   },
+//                 },
+//                 {
+//                   $addFields: {
+//                     userDetailsOnNested: {
+//                       $arrayElemAt: ["$userOnNestedReplies", 0],
+//                     },
+//                     totalrepliesonNestedReplies: {
+//                       $size: { $ifNull: ["$repliesonNestedReplies", []] },
+//                     },
+//                   },
+//                 },
+
+//                 {
+//                   $project: {
+//                     _id: 1,
+//                     content: 1,
+//                     commentBy: 1,
+//                     "userDetailsOnNested.username": 1,
+//                     "userDetailsOnNested.fullname": 1,
+//                     totalrepliesonNestedReplies: 1,
+//                     repliesonNestedReplies: 1,
+//                     totallikesonNestedReplies: 1,
+//                   },
+//                 },
+//               ],
+//             },
+//           },
+//           {
+//             $project: {
+//               _id: 1,
+//               content: 1,
+//               commentBy: 1,
+//               "userDetailsOnreply.username": 1,
+//               "userDetailsOnreply.fullname": 1,
+//               totalLikesonReply: 1,
+//             },
+//           },
+//         ],
+//       },
+//     },
+//     {
+//       $addFields: {
+//         totalLikes: { $size: { $ifNull: ["$Likes", []] } },
+//         totalReplies: { $size: { $ifNull: ["$replies", []] } },
+//       },
+//     },
+//     {
+//       $project: {
+//         _id: 1,
+//         content: 1,
+//         commentBy: 1,
+//         totalLikes: 1,
+//         totalReplies: 1,
+//         "userDetails.username": 1,
+//         "userDetails.fullname": 1,
+//         replies: {
+//           _id: 1,
+//           content: 1,
+//           commentBy: 1,
+//           "userDetailsOnreply.username": 1,
+//           "userDetailsOnreply.fullname": 1,
+//           totalLikesonReply: 1,
+//           nestedReplies: {
+//             _id: 1,
+//             content: 1,
+//             commentBy: 1,
+//             "userDetailsOnNested.username": 1,
+//             "userDetailsOnNested.fullname": 1,
+//             totalrepliesonNestedReplies: 1,
+//             repliesonNestedReplies: 1,
+//             totallikesonNestedReplies: 1,
+//           },
+//         },
+//       },
+//     },
+//   ]);
+
+//   console.log(totalComment.content);
+//   if (!totalComment) {
+//     throw new ApiError(404, "Not found");
+//   }
+
+//   return res.status(200).json(new ApiResponse(200, totalComment, "Success"));
+// });
+
+const getCOC = asyncHandler(async (req, res) => {
+  const { videoId } = req.params;
+  if (!videoId) {
+    throw new ApiError(400, "Video Id needed");
+  }
+
+  const commentWithDetails = await Comment.aggregate([
+    {
+      $match: {
+        video: new mongoose.Types.ObjectId(videoId),
+        onComment: { $exists: false },
+      },
+    },
+    {
+      $lookup: {
+        from: "users",
+        localField: "commentBy",
+        foreignField: "_id",
+        as: "author",
+      },
+    },
+    {
+      $unwind: "$author",
+    },
+    {
+      $lookup: {
+        from: "likes",
+        let: { commentId: "$_id" },
+        pipeline: [
+          { $match: { $expr: { $eq: ["$comment", "$$commentId"] } } },
+          { $count: "count" },
+        ],
+        as: "totalLikes",
+      },
+    },
+    {
+      $lookup: {
+        from: "comments",
+        let: { parentId: "$_id" },
+        pipeline: [
+          { $match: { $expr: { $eq: ["$onComment", "$$parentId"] } } },
+          {
+            $lookup: {
+              from: "users",
+              localField: "commentBy",
+              foreignField: "_id",
+              as: "author",
+            },
+          },
+          {
+            $unwind: "$author",
+          },
+          {
+            $lookup: {
+              from: "likes",
+              let: { replyId: "$_id" },
+              pipeline: [
+                { $match: { $expr: { $eq: ["$comment", "$$replyId"] } } },
+                { $count: "count" },
+              ],
+              as: "totalLikes",
+            },
+          },
+          {
+            $lookup: {
+              from: "comments",
+              let: { parentId: "$_id" },
+              pipeline: [
+                { $match: { $expr: { $eq: ["$onComment", "$$parentId"] } } },
+
+                {
+                  $lookup: {
+                    from: "users",
+                    localField: "commentBy",
+                    foreignField: "_id",
+                    as: "author",
+                  },
+                },
+                { $unwind: "$author" },
+                {
+                  $lookup: {
+                    from: "likes",
+                    let: { nestedReplyId: "$_id" },
+                    pipeline: [
+                      {
+                        $match: {
+                          $expr: { $eq: ["$comment", "$$nestedReplyId"] },
+                        },
+                      },
+                      { $count: "count" },
+                    ],
+                    as: "totalLikes",
+                  },
+                },
+                {
+                  $project: {
+                    _id: 1,
+                    content: 1,
+                    commentBy: 1,
+                    author: { username: 1, fullname: 1 },
+                    totalLikes: {
+                      $ifNull: [{ $arrayElemAt: ["$totalLikes.count", 0] }, 0],
+                    },
+                    //  totalReplies: 0,
+                  },
+                },
+              ],
+              as: "replies",
+            },
+          },
+          {
+            $project: {
+              _id: 1,
+              content: 1,
+              commentBy: 1,
+              author: {
+                username: "$author.username",
+                fullname: "$author.fullname",
+              },
+              totalLikes: {
+                $ifNull: [{ $arrayElemAt: ["$totalLikes.count", 0] }, 0],
+              },
+              replies: 1,
+            },
+          },
+        ],
+        as: "replies",
+      },
+    },
+    {
+      $project: {
+        _id: 1,
+        content: 1,
+        commentBy: 1,
+        author: { username: 1, fullname: 1 },
+        totalLikes: {
+          $ifNull: [{ $arrayElemAt: ["$totalLikes.count", 0] }, 0],
+        },
+        replies: 1,
+      },
+    },
+  ]);
+
+  if (!commentWithDetails.length) {
+    throw new ApiResponse(200, {}, "No comments Found");
+  }
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, commentWithDetails, "Fetched"));
+});
 export { addComment, getAllCommentWithLike, addCommentOnComment, getCOC };
